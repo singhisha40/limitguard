@@ -1,0 +1,29 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build: ./server
+    environment:
+      PORT: 4000
+      REDIS_URL: redis://redis:6379
+      MONGO_URL: mongodb://mongo:27017/limitguard
+      FAIL_MODE: open
+      TRUST_PROXY: 1
+    depends_on: [redis, mongo]
+    ports: ["4000:4000"]
+
+  client:
+    build: ./client
+    depends_on: [server]
+    ports: ["8080:80"]
+
+volumes:
+  mongo-data:
